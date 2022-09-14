@@ -1,0 +1,12 @@
+{
+    "name": "andy/discord-api",
+    "authors": [
+        {
+            "name": "Andrew Lehman",
+            "email": "aplehm@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
+    }
+}
