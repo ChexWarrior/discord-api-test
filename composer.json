@@ -9,6 +9,6 @@
     "require": {
         "guzzlehttp/guzzle": "^7.0",
         "slim/slim": "4.*",
-        "slim/psr7": "^1.5"
+        "guzzlehttp/psr7": "^2"
     }
 }
