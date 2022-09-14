@@ -9,6 +9,7 @@
     "require": {
         "guzzlehttp/guzzle": "^7.0",
         "slim/slim": "4.*",
-        "guzzlehttp/psr7": "^2"
+        "guzzlehttp/psr7": "^2",
+        "twig/twig": "^3.0"
     }
 }
