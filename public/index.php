@@ -13,11 +13,19 @@ $twigLoader = new FilesystemLoader('./templates');
 
 $app->get('/', function(Request $request, Response $response, $args) use ($twigLoader) {
     $template = new Environment($twigLoader);
+
     $response->getBody()->write($template->render('home.twig', [
         'title' => 'DISCORD API TEST',
+        'status' => '',
     ]));
 
     return $response;
+});
+
+$app->post('/create', function (Request $request, Response $response) {
+    
+
+    return $response->withStatus(302)->withHeader('Location', '/');
 });
 
 $app->run();
