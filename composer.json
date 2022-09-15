@@ -10,6 +10,7 @@
         "guzzlehttp/guzzle": "^7.0",
         "slim/slim": "4.*",
         "guzzlehttp/psr7": "^2",
-        "twig/twig": "^3.0"
+        "twig/twig": "^3.0",
+        "vlucas/phpdotenv": "^5.4"
     }
 }
