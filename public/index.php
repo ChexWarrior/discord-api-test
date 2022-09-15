@@ -65,14 +65,18 @@ $app->post('/create', function (Request $request, Response $response) use ($appI
         ],
     ];
 
-    $url = "https://discord.com/api/v10/applications/$appId/commands";
+    $url = "https://discord.com/api/v10/applications/$appId/guilds/$guildId/commands";
     $client =  new Client();
-    $response = $client->post($url, [
-        'json' => $data,
-        'headers' => [
-            'Authorization' => "Bot $botToken",
-        ]
-    ]);
+    try {
+        $discordResponse = $client->post($url, [
+            'json' => $data,
+            'headers' => [
+                'Authorization' => "Bot $botToken",
+            ]
+        ]);
+    } catch (Exception $e) {
+        echo $e->getMessage();
+    }
 
     return $response->withStatus(302)->withHeader('Location', '/');
 });
