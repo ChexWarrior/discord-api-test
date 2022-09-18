@@ -6,6 +6,11 @@
             "email": "aplehm@gmail.com"
         }
     ],
+    "autoload": {
+      "psr-4": {
+        "Chexwarrior\\": "src/"
+      }
+    },
     "require": {
         "guzzlehttp/guzzle": "^7.0",
         "slim/slim": "4.*",
