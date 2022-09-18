@@ -9,7 +9,15 @@
 <body>
   <h1>{{title}}</h1>
   <form action="/create" method="POST">
-    <input name="create" value="Create Method" type="submit">
+    <label for="command-action">Command Options</label>
+    <select name="command-action">
+      <option value="" selected></option>
+      <option value="create">Create</option>
+      <option value="list">List</option>
+      <option value="delete">Delete</option>
+    </select>
+    <br><br>
+    <input name="create" value="Run" type="submit">
   </form>
 </body>
 </html>
