@@ -1,24 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <title>{{title}}</title>
-</head>
-<body>
-  <h1>{{title}}</h1>
-  <form action="/command" method="POST">
-    <label for="command-action">Command Options</label>
-    <select name="command-action">
-      <option value="" selected></option>
-      <option value="create">Create</option>
-      <option value="list">List</option>
-      <option value="delete">Delete</option>
-    </select>
-    <br><br>
-    <input name="create" value="Run" type="submit">
-  </form>
-</body>
-</html>
+{% extends "base.twig" %}
+
+{% block title %}Discord API Commands Home{% endblock %}
+
+{% block content %}
+<h2>Discord API Command Actions</h2>
+<form action="/command" method="POST">
+  <label for="command-action">Command Options</label>
+  <select name="command-action">
+    <option value="" selected></option>
+    <option value="create">Create</option>
+    <option value="list">List</option>
+    <option value="delete">Delete</option>
+  </select>
+  <br><br>
+  <input name="create" value="Run" type="submit">
+</form>
+{% endblock %}
