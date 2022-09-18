@@ -48,12 +48,16 @@ $app->post('/command', function (Request $request, Response $response) {
 $app->get('/action', function (Request $request, Response $response) use ($commandHandler, $twigLoader) {
     // Ensure action is create, list or delete
     $commandAction ??= $_GET['type'];
-    $results = match($commandAction) {
-        'create' => $commandHandler->createCommand(),
-        'list' => $commandHandler->listCommands(),
-        'delete' => $commandHandler->deleteCommand(),
-        default => null
-    };
+
+    if ($commandAction === 'list') {
+        $results = $commandHandler->listCommands();
+    } else if ($commandAction === 'delete') {
+        $commandId ??= urlencode($_GET['commandId']);
+        $results = $commandHandler->deleteCommand($commandId);
+    } else if ($commandAction === 'create') {
+        $results = $commandHandler->createCommand();
+    }
+
 
     if (empty($results)) return $response->withStatus(404);
 

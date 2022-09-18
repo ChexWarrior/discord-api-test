@@ -42,8 +42,14 @@ class CommandHandler
         return $results;
     }
 
-    public function deleteCommand() {
-        return 'Delete Command called!';
+    public function deleteCommand($commandId) {
+        $response = $this->makeRequest("commands/$commandId", 'DELETE');
+
+        if ($response->getStatusCode() === 204) {
+            return "$commandId deleted!";
+        }
+
+        return "$commandId not deleted!";
     }
 
     private function makeRequest(string $url, string $type, array $options = []): Response {

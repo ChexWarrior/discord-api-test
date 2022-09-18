@@ -10,6 +10,8 @@
         {{result.name|capitalize}} -- {{result.id}}
         <br>
       {% endfor %}
+    {% elseif commandAction == 'delete' %}
+      <strong>{{results}}</strong>
     {% endif %}
   </div>
   <br>
