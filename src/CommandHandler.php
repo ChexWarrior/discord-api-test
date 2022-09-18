@@ -15,7 +15,7 @@ class CommandHandler
 
     public function __construct(string $appId, string $botToken, string $guildId) {
         $this->client = new Client([
-            'base_uri' => "https://discord.com/api/v10/applications/$appId/guilds/$guildId/commands",
+            'base_uri' => "https://discord.com/api/v10/applications/$appId/guilds/$guildId/",
             'headers' => [
                 'Authorization' => "Bot $botToken",
             ]
@@ -27,19 +27,19 @@ class CommandHandler
     }
 
     public function listCommands() {
-        // $response = $this->makeRequest('/', 'GET');
-        // $commandInfo = [];
-        // $body = $response->getBody()->getContents();
-        // $jsonBody = json_decode(json: $body, associative: true);
+        $response = $this->makeRequest('commands', 'GET');
+        $results = [];
+        $body = $response->getBody()->getContents();
+        $jsonBody = json_decode(json: $body, associative: true);
 
-        // foreach ($jsonBody as $command) {
-        //     $commandInfo[] = [
-        //         'name' => $command['name'],
-        //         'id' => $command['id'],
-        //     ];
-        // }
+        foreach ($jsonBody as $command) {
+            $results[] = [
+                'name' => $command['name'],
+                'id' => $command['id'],
+            ];
+        }
 
-        return 'List Command called!';
+        return $results;
     }
 
     public function deleteCommand() {

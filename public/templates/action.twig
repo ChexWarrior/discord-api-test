@@ -5,7 +5,12 @@
 {% block content %}
   <h2>{{commandAction|capitalize}} Results</h2>
   <div>
-    TBD
+    {% if commandAction == 'list' %}
+      {% for result in results %}
+        {{result.name|capitalize}} -- {{result.id}}
+        <br>
+      {% endfor %}
+    {% endif %}
   </div>
   <br>
   <a href="/">Home</a>
