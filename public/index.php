@@ -1,5 +1,6 @@
 <?php declare(strict_types=1);
 
+use Chexwarrior\CommandHandler;
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
@@ -17,8 +18,18 @@ $appId = $_ENV['APP_ID'];
 $botToken = $_ENV['BOT_TOKEN'];
 $guildId = $_ENV['GUILD_ID'];
 
+$commandHandler = new CommandHandler($appId, $botToken, $guildId);
+
 $app = AppFactory::create();
 $twigLoader = new FilesystemLoader('./templates');
+
+/**
+ * Sample Application to Understand Discord API
+ *
+ * Goal: Create Rock Paper Scissors Game
+ *
+ * Create buttons to allow us to: Create, Remove and See all commands we've created, also the Create method should let us know if we've already created one
+ */
 
 $app->get('/', function(Request $request, Response $response, $args) use ($twigLoader) {
     $template = new Environment($twigLoader);
@@ -30,7 +41,7 @@ $app->get('/', function(Request $request, Response $response, $args) use ($twigL
     return $response;
 });
 
-$app->post('/create', function (Request $request, Response $response) use ($appId, $botToken, $guildId) {
+$app->post('/command', function (Request $request, Response $response) use ($appId, $botToken, $guildId) {
     $data = [
         'name' => 'test',
         'type' => 1,
