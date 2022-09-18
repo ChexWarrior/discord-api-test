@@ -33,7 +33,6 @@ $twigLoader = new FilesystemLoader('./templates');
 
 $app->get('/', function(Request $request, Response $response, $args) use ($twigLoader) {
     $template = new Environment($twigLoader);
-
     $response->getBody()->write($template->render('home.twig', [
         'title' => 'DISCORD API TEST',
     ]));
@@ -41,55 +40,21 @@ $app->get('/', function(Request $request, Response $response, $args) use ($twigL
     return $response;
 });
 
-$app->post('/command', function (Request $request, Response $response) use ($appId, $botToken, $guildId) {
-    $data = [
-        'name' => 'test',
-        'type' => 1,
-        'description' => 'Random test command',
-        'options' => [
-            [
-                'name' => 'random',
-                'description' => 'Random option',
-                'type' => 3,
-                'required' => true,
-                'choices' => [
-                    [
-                        'name' => 'Rock',
-                        'value' => 'rock',
-                    ],
-                    [
-                        'name' => 'Paper',
-                        'value' => 'paper',
-                    ],
-                    [
-                        'name' => 'Scissors',
-                        'value' => 'scissors'
-                    ]
-                ]
-            ],
-            [
-                'name' => 'hello',
-                'description' => 'another option',
-                'type' => 5,
-                'required' => false,
-            ]
-        ],
-    ];
+$app->post('/command', function (Request $request, Response $response) use ($commandHandler) {
+    $commandAction ??= $_POST['command-action'];
+    $commandResult = match($commandAction) {
+        'create' => $commandHandler->createCommand(),
+        'list' => $commandHandler->listCommands(),
+        'delete' => $commandHandler->deleteCommand(),
+        default => null,
+    };
 
-    $url = "https://discord.com/api/v10/applications/$appId/guilds/$guildId/commands";
-    $client =  new Client();
-    try {
-        $discordResponse = $client->post($url, [
-            'json' => $data,
-            'headers' => [
-                'Authorization' => "Bot $botToken",
-            ]
-        ]);
-    } catch (Exception $e) {
-        echo $e->getMessage();
-    }
+    if (empty($commandResult)) return $response->withStatus(404);
+    $result = urlencode($commandResult);
 
-    return $response->withStatus(302)->withHeader('Location', '/');
+    return $response
+        ->withStatus(302)
+        ->withHeader('Location', "/?result=$result");
 });
 
 $app->run();
