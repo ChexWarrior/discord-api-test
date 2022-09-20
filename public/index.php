@@ -36,10 +36,15 @@ $app->get('/', function(Request $request, Response $response, $args) use ($twigL
 
 $app->post('/command', function (Request $request, Response $response) {
     $commandAction ??= $_POST['command-action'];
+    $commandId ??= $_POST['command-id'];
     $commandResult = $commandAction === 'create' || $commandAction === 'delete' || $commandAction === 'list';
     $requestId = uniqid();
 
     if (!$commandResult) return $response->withStatus(404);
+
+    if ($commandAction === 'delete') {
+        apcu_store("{$requestId}_command_id_delete", $commandId);
+    }
 
     return $response
         ->withStatus(303)
@@ -50,11 +55,17 @@ $app->post('/command', function (Request $request, Response $response) {
 $app->get('/action', function (Request $request, Response $response) use ($commandHandler, $twigLoader) {
     // Ensure action is create, list or delete
     $commandAction ??= $_GET['type'];
+    $cookies ??= $request->getHeader('Cookie');
+    $requestId = null;
+
+    if (!empty($cookies)) {
+        [, $requestId] = explode('=', $cookies[0]);
+    }
 
     if ($commandAction === 'list') {
         $results = $commandHandler->listCommands();
     } else if ($commandAction === 'delete') {
-        $commandId ??= urlencode($_GET['commandId']);
+        $commandId = apcu_fetch("{$requestId}_command_id_delete");
         $results = $commandHandler->deleteCommand($commandId);
     } else if ($commandAction === 'create') {
         $results = $commandHandler->createCommand();
