@@ -37,11 +37,13 @@ $app->get('/', function(Request $request, Response $response, $args) use ($twigL
 $app->post('/command', function (Request $request, Response $response) {
     $commandAction ??= $_POST['command-action'];
     $commandResult = $commandAction === 'create' || $commandAction === 'delete' || $commandAction === 'list';
+    $requestId = uniqid();
 
     if (!$commandResult) return $response->withStatus(404);
 
     return $response
-        ->withStatus(302)
+        ->withStatus(303)
+        ->withHeader('Set-Cookie', "requestId=$requestId; HttpOnly")
         ->withHeader('Location', "/action?type=$commandAction");
 });
 
