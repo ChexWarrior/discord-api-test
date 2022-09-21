@@ -5,6 +5,12 @@ use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use ParagonIE\ConstantTime\Hex;
+use ParagonIE\Halite\Asymmetric\Crypto;
+use ParagonIE\Halite\Asymmetric\SignaturePublicKey;
+use ParagonIE\Halite\Halite;
+use ParagonIE\Halite\KeyFactory;
+use ParagonIE\HiddenString\HiddenString;
 use Slim\Factory\AppFactory;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -16,6 +22,7 @@ $dotenv->load();
 $appId = $_ENV['APP_ID'];
 $botToken = $_ENV['BOT_TOKEN'];
 $guildId = $_ENV['GUILD_ID'];
+$publicKey = $_ENV['PUBLIC_KEY'];
 $commandHandler = new CommandHandler($appId, $botToken, $guildId);
 $app = AppFactory::create();
 $twigLoader = new FilesystemLoader('./templates');
@@ -78,6 +85,35 @@ $app->get('/action', function (Request $request, Response $response) use ($comma
     ]));
 
     return $response;
+});
+
+$app->post('/interaction', function (Request $request, Response $response) use ($publicKey) {
+    // Handle header signature
+    [$signature] = $request->getHeader('X-Signature-Ed25519');
+    [$signatureTimestamp] = $request->getHeader('X-Signature-Timestamp');
+    $rawBody = $request->getBody()->getContents();
+    $signPublicKey = KeyFactory::importSignaturePublicKey(
+        new HiddenString(
+            Hex::encode(
+                Halite::HALITE_VERSION_KEYS . $publicKey . \sodium_crypto_generichash(
+                    Halite::HALITE_VERSION_KEYS . $publicKey, '', \SODIUM_CRYPTO_GENERICHASH_BYTES_MAX
+                )
+            )
+        )
+    );
+    $valid = Crypto::verify($signatureTimestamp . $rawBody, $signPublicKey, $signature);
+
+    if (!$valid) {
+        return $response->withStatus(401);
+    }
+
+    // Handle ping message
+    $body = json_decode($rawBody, true);
+    if (array_key_exists('type', $body) && $body['type'] === 1) {
+        return $response->withStatus(200);
+    }
+
+    // Handle player choice in challenge
 });
 
 $app->run();
