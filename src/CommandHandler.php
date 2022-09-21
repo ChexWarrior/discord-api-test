@@ -3,15 +3,40 @@
 namespace Chexwarrior;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\Response;
 
 class CommandHandler
 {
     private Client $client;
+
+    private array $gameCommand = [
+        'name' => 'challenge',
+        'description' => 'Initiate game of Rock, Paper, Scissors with the computer',
+        'options' => [
+            [
+                'type' => 3, // STRING
+                'name' => 'choice',
+                'required' => true,
+                'description' => 'Rock, Paper or Scissors',
+                'choices' => [
+                    [
+                        'name' => 'Rock',
+                        'value' => 'rock',
+                    ],
+                    [
+                        'name' => 'Paper',
+                        'value' => 'paper',
+                    ],
+                    [
+                        'name' => 'Scissors',
+                        'value' => 'scissors',
+                    ],
+                ]
+            ]
+        ],
+    ];
 
     public function __construct(string $appId, string $botToken, string $guildId) {
         $this->client = new Client([
@@ -23,7 +48,13 @@ class CommandHandler
     }
 
     public function createCommand() {
-        return 'Create Command called!';
+        $response = $this->makeRequest('commands', 'POST', ['json' => $this->gameCommand]);
+
+        if ($response->getStatusCode() === 201) {
+            return 'Command created successfully!';
+        }
+
+        return 'Command not created :(';
     }
 
     public function listCommands() {

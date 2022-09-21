@@ -71,9 +71,6 @@ $app->get('/action', function (Request $request, Response $response) use ($comma
         $results = $commandHandler->createCommand();
     }
 
-
-    if (empty($results)) return $response->withStatus(404);
-
     $template = new Environment($twigLoader);
     $response->getBody()->write($template->render('action.twig', [
         'commandAction' => $commandAction,
