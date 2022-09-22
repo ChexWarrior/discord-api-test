@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 use Chexwarrior\CommandHandler;
+use Discord\Interaction;
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
@@ -88,29 +89,23 @@ $app->get('/action', function (Request $request, Response $response) use ($comma
 });
 
 $app->post('/interaction', function (Request $request, Response $response) use ($publicKey) {
-    // Handle header signature
+    // Handle header signature verification
     [$signature] = $request->getHeader('X-Signature-Ed25519');
     [$signatureTimestamp] = $request->getHeader('X-Signature-Timestamp');
     $rawBody = $request->getBody()->getContents();
-    $signPublicKey = KeyFactory::importSignaturePublicKey(
-        new HiddenString(
-            Hex::encode(
-                Halite::HALITE_VERSION_KEYS . $publicKey . \sodium_crypto_generichash(
-                    Halite::HALITE_VERSION_KEYS . $publicKey, '', \SODIUM_CRYPTO_GENERICHASH_BYTES_MAX
-                )
-            )
-        )
-    );
-    $valid = Crypto::verify($signatureTimestamp . $rawBody, $signPublicKey, $signature);
 
-    if (!$valid) {
+    if (!Interaction::verifyKey($rawBody, $signature, $signatureTimestamp, $publicKey)) {
         return $response->withStatus(401);
     }
 
     // Handle ping message
     $body = json_decode($rawBody, true);
     if (array_key_exists('type', $body) && $body['type'] === 1) {
-        return $response->withStatus(200);
+       $pong = json_encode(['type' => 1]);
+       $response->getBody()->write($pong);
+       return $response
+        ->withStatus(200)
+        ->withHeader('Content-Type', 'application/json');
     }
 
     // Handle player choice in challenge
