@@ -113,11 +113,19 @@ $app->post('/interactions', function (Request $request, Response $response) use 
 
     // Handle player choice in challenge
     if (array_key_exists('type', $body) && $body['type'] === InteractionType::APPLICATION_COMMAND) {
-        $choiceData = $body['data']['options'];
+        $playerChoice = strtolower($body['data']['options'][0]['value']);
+        $computerChoice = match(random_int(1, 3)) {
+            1 => 'rock',
+            2 => 'paper',
+            3 => 'scissors'
+        };
+
+        $msg = determineWinner($playerChoice, $computerChoice);
+
         $interactionResponse = [
             'type' => InteractionResponseType::CHANNEL_MESSAGE_WITH_SOURCE,
             'data' => [
-                'content' => 'Message Response!',
+                'content' => "Computer played $computerChoice! $msg",
             ]
         ];
 
@@ -130,5 +138,38 @@ $app->post('/interactions', function (Request $request, Response $response) use 
 
     return $response->withStatus(400);
 });
+
+function determineWinner($playerChoice, $computerChoice) {
+    $playerWinMsg = 'Player Wins!';
+    $computerWinMsg = 'Computer Wins!';
+
+    if ($playerChoice === $computerChoice) {
+        return "Draw!";
+    }
+
+    if ($playerChoice === 'rock' && $computerChoice === 'paper') {
+        return $computerWinMsg;
+    }
+
+    if ($playerChoice === 'rock' && $computerChoice === 'scissors') {
+        return $playerWinMsg;
+    }
+
+    if ($playerChoice === 'paper' && $computerChoice === 'rock') {
+        return $playerWinMsg;
+    }
+
+    if ($playerChoice === 'paper' && $computerChoice === 'scissors') {
+        return $computerWinMsg;
+    }
+
+    if ($playerChoice === 'scissors' && $computerChoice === 'paper') {
+        return $playerWinMsg;
+    }
+
+    if ($playerChoice === 'scissors' && $computerChoice === 'rock') {
+        return $computerWinMsg;
+    }
+}
 
 $app->run();
