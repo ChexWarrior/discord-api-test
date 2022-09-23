@@ -2,6 +2,8 @@
 
 use Chexwarrior\CommandHandler;
 use Discord\Interaction;
+use Discord\InteractionResponseType;
+use Discord\InteractionType;
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
@@ -88,7 +90,7 @@ $app->get('/action', function (Request $request, Response $response) use ($comma
     return $response;
 });
 
-$app->post('/interaction', function (Request $request, Response $response) use ($publicKey) {
+$app->post('/interactions', function (Request $request, Response $response) use ($publicKey) {
     // Handle header signature verification
     [$signature] = $request->getHeader('X-Signature-Ed25519');
     [$signatureTimestamp] = $request->getHeader('X-Signature-Timestamp');
@@ -98,9 +100,10 @@ $app->post('/interaction', function (Request $request, Response $response) use (
         return $response->withStatus(401);
     }
 
-    // Handle ping message
     $body = json_decode($rawBody, true);
-    if (array_key_exists('type', $body) && $body['type'] === 1) {
+
+    // Handle ping message
+    if (array_key_exists('type', $body) && $body['type'] === InteractionType::PING) {
        $pong = json_encode(['type' => 1]);
        $response->getBody()->write($pong);
        return $response
@@ -109,6 +112,23 @@ $app->post('/interaction', function (Request $request, Response $response) use (
     }
 
     // Handle player choice in challenge
+    if (array_key_exists('type', $body) && $body['type'] === InteractionType::APPLICATION_COMMAND) {
+        $choiceData = $body['data']['options'];
+        $interactionResponse = [
+            'type' => InteractionResponseType::CHANNEL_MESSAGE_WITH_SOURCE,
+            'data' => [
+                'content' => 'Message Response!',
+            ]
+        ];
+
+        $response->getBody()->write(json_encode($interactionResponse));
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    return $response->withStatus(400);
 });
 
 $app->run();
