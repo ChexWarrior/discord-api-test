@@ -96,7 +96,19 @@ $app->post('/interactions', function (Request $request, Response $response) use 
     [$signatureTimestamp] = $request->getHeader('X-Signature-Timestamp');
     $rawBody = $request->getBody()->getContents();
 
-    if (!Interaction::verifyKey($rawBody, $signature, $signatureTimestamp, $publicKey)) {
+    $binPublicKey = hex2bin($publicKey);
+    $keyData = Halite::HALITE_VERSION_KEYS . $binPublicKey .
+        \sodium_crypto_generichash(
+            Halite::HALITE_VERSION_KEYS . $binPublicKey,
+            '',
+            \SODIUM_CRYPTO_GENERICHASH_BYTES_MAX
+        );
+
+    $signPublicKey = KeyFactory::importSignaturePublicKey(
+        new HiddenString(Hex::encode($keyData))
+    );
+
+    if (!Crypto::verify($signatureTimestamp . $rawBody, $signPublicKey, $signature, false)) {
         return $response->withStatus(401);
     }
 
