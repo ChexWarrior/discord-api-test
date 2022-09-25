@@ -20,8 +20,6 @@
         "guzzlehttp/psr7": "^2",
         "twig/twig": "^3.0",
         "vlucas/phpdotenv": "^5.4",
-        "discord/interactions": "^2.2",
-        "simplito/elliptic-php": "^1.0",
         "paragonie/halite": "^5"
     }
 }
