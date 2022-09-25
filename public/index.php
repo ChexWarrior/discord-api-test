@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 
 use Chexwarrior\CommandHandler;
-use Discord\InteractionType;
 use Dotenv\Dotenv;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
