@@ -25,6 +25,16 @@ $publicKey = $_ENV['PUBLIC_KEY'];
 $commandHandler = new CommandHandler($appId, $botToken, $guildId);
 $app = AppFactory::create();
 $twigLoader = new FilesystemLoader('./templates');
+$binPublicKey = hex2bin($publicKey);
+$keyData = Halite::HALITE_VERSION_KEYS . $binPublicKey .
+    \sodium_crypto_generichash(
+        Halite::HALITE_VERSION_KEYS . $binPublicKey,
+        '',
+        \SODIUM_CRYPTO_GENERICHASH_BYTES_MAX
+    );
+$signPublicKey = KeyFactory::importSignaturePublicKey(
+    new HiddenString(Hex::encode($keyData))
+);
 
 /**
  * Sample Application to Understand Discord API
@@ -86,23 +96,11 @@ $app->get('/action', function (Request $request, Response $response) use ($comma
     return $response;
 });
 
-$app->post('/interactions', function (Request $request, Response $response) use ($publicKey) {
+$app->post('/interactions', function (Request $request, Response $response) use ($signPublicKey) {
     // Handle header signature verification
     [$signature] = $request->getHeader('X-Signature-Ed25519');
     [$signatureTimestamp] = $request->getHeader('X-Signature-Timestamp');
     $rawBody = $request->getBody()->getContents();
-
-    $binPublicKey = hex2bin($publicKey);
-    $keyData = Halite::HALITE_VERSION_KEYS . $binPublicKey .
-        \sodium_crypto_generichash(
-            Halite::HALITE_VERSION_KEYS . $binPublicKey,
-            '',
-            \SODIUM_CRYPTO_GENERICHASH_BYTES_MAX
-        );
-
-    $signPublicKey = KeyFactory::importSignaturePublicKey(
-        new HiddenString(Hex::encode($keyData))
-    );
 
     if (!Crypto::verify($signatureTimestamp . $rawBody, $signPublicKey, $signature, false)) {
         return $response->withStatus(401);
@@ -111,7 +109,7 @@ $app->post('/interactions', function (Request $request, Response $response) use 
     $body = json_decode($rawBody, true);
 
     // Handle ping message
-    if (array_key_exists('type', $body) && $body['type'] === InteractionType::PING) {
+    if (array_key_exists('type', $body) && $body['type'] === 1) {
        $pong = json_encode(['type' => 1]);
        $response->getBody()->write($pong);
        return $response
