@@ -1,16 +1,12 @@
 <?php declare(strict_types=1);
 
 use Chexwarrior\CommandHandler;
-use Discord\Interaction;
-use Discord\InteractionResponseType;
 use Discord\InteractionType;
 use Dotenv\Dotenv;
-use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use ParagonIE\ConstantTime\Hex;
 use ParagonIE\Halite\Asymmetric\Crypto;
-use ParagonIE\Halite\Asymmetric\SignaturePublicKey;
 use ParagonIE\Halite\Halite;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\HiddenString\HiddenString;
@@ -124,7 +120,7 @@ $app->post('/interactions', function (Request $request, Response $response) use 
     }
 
     // Handle player choice in challenge
-    if (array_key_exists('type', $body) && $body['type'] === InteractionType::APPLICATION_COMMAND) {
+    if (array_key_exists('type', $body) && $body['type'] === 2) {
         $playerChoice = strtolower($body['data']['options'][0]['value']);
         $computerChoice = match(random_int(1, 3)) {
             1 => 'rock',
@@ -135,7 +131,7 @@ $app->post('/interactions', function (Request $request, Response $response) use 
         $msg = determineWinner($playerChoice, $computerChoice);
 
         $interactionResponse = [
-            'type' => InteractionResponseType::CHANNEL_MESSAGE_WITH_SOURCE,
+            'type' => 4,
             'data' => [
                 'content' => "Computer played $computerChoice! $msg",
             ]
